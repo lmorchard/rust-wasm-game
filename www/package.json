@@ -1,0 +1,43 @@
+{
+  "name": "create-wasm-app",
+  "version": "0.1.0",
+  "description": "create an app to consume rust-generated wasm packages",
+  "main": "index.js",
+  "bin": {
+    "create-wasm-app": ".bin/create-wasm-app.js"
+  },
+  "scripts": {
+    "start": "npm run watch",
+    "build": "npm-run-all build:wasm build:webpack",
+    "build:webpack": "webpack --config webpack.config.js",
+    "build:wasm": "cd .. && RUST_LOG=wasm_pack wasm-pack -v build",
+    "watch": "npm-run-all --parallel watch:*",
+    "watch:webpack": "webpack-dev-server",
+    "watch:wasm": "onchange -v -i \"../src/**/*.rs\" -- npm run build:wasm"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rustwasm/create-wasm-app.git"
+  },
+  "keywords": [
+    "webassembly",
+    "wasm",
+    "rust",
+    "webpack"
+  ],
+  "author": "Ashley Williams <ashley666ashley@gmail.com>",
+  "license": "(MIT OR Apache-2.0)",
+  "bugs": {
+    "url": "https://github.com/rustwasm/create-wasm-app/issues"
+  },
+  "homepage": "https://github.com/rustwasm/create-wasm-app#readme",
+  "devDependencies": {
+    "copy-webpack-plugin": "^5.0.0",
+    "hello-wasm-pack": "^0.1.0",
+    "npm-run-all": "^4.1.5",
+    "onchange": "^5.2.0",
+    "webpack": "^4.29.3",
+    "webpack-cli": "^3.1.0",
+    "webpack-dev-server": "^3.1.5"
+  }
+}
