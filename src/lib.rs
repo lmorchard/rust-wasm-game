@@ -8,10 +8,10 @@ extern crate wasm_bindgen;
 extern crate web_sys;
 
 use cfg_if::cfg_if;
-use wasm_bindgen::prelude::*;
-
 use na::{Point2, Vector2};
 use pyro::*;
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::{JsCast, JsValue};
 
 mod utils;
 
@@ -71,6 +71,7 @@ pub fn create_bouncing_entity() -> BouncingEntity {
 pub struct Main {
     world: World,
     frame: render_frame::RenderFrame,
+    context: web_sys::CanvasRenderingContext2d,
 }
 
 #[wasm_bindgen]
@@ -81,10 +82,28 @@ impl Main {
         let mut world = World::new();
         let frame = render_frame::RenderFrame::new(10);
 
-        let bouncers = (0..10).map(|_| create_bouncing_entity());
+        let bouncers = (0..50).map(|_| create_bouncing_entity());
         world.append_components(bouncers);
 
-        Main { world, frame }
+        let document = web_sys::window().unwrap().document().unwrap();
+        let canvas = document.get_element_by_id("main").unwrap();
+        let canvas: web_sys::HtmlCanvasElement = canvas
+            .dyn_into::<web_sys::HtmlCanvasElement>()
+            .map_err(|_| ())
+            .unwrap();
+
+        let context = canvas
+            .get_context("2d")
+            .unwrap()
+            .unwrap()
+            .dyn_into::<web_sys::CanvasRenderingContext2d>()
+            .unwrap();
+
+        Main {
+            world,
+            frame,
+            context,
+        }
     }
 
     pub fn update(&mut self, time_delta: f32) {
@@ -96,7 +115,37 @@ impl Main {
             update_func(world, dt);
         }
 
-        self.frame.snapshot_world(world);
+        // self.frame.snapshot_world(world);
+    }
+
+    pub fn draw(&mut self, _time_delta: f32) {
+        let ctx = &self.context;
+
+        ctx.set_fill_style(&JsValue::from_str("rgba(0, 0, 0, 1.0)"));
+        ctx.fill_rect(0.0, 0.0, 1000.0, 1000.0);
+
+        let scale: f64 = 0.25;
+        self.world
+            .matcher::<All<(
+                Read<motion::Position>,
+                Read<motion::Orientation>,
+                Read<sprite::Sprite>,
+            )>>()
+            .for_each(|(pos, orientation, _sprite)| {
+                ctx.save();
+                ctx.translate(pos.0.x as f64, pos.0.y as f64).unwrap();
+                ctx.rotate(orientation.0 as f64).unwrap();
+                ctx.scale(scale, scale).unwrap();
+                ctx.set_line_width(1.0 / scale);
+                ctx.set_stroke_style(&JsValue::from_str("rgba(255, 255, 255, 0.9)"));
+                ctx.begin_path();
+                ctx.arc(0.0, 0.0, 50.0, 0.0, PI2 as f64).unwrap();
+                ctx.move_to(0.0, 0.0);
+                ctx.line_to(0.0, -50.0);
+                ctx.move_to(0.0, 0.0);
+                ctx.stroke();
+                ctx.restore();
+            });
     }
 
     pub fn get_render_size(&self) -> usize {

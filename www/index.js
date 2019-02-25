@@ -33,7 +33,6 @@ class Driver {
     this.lastDrawTime = 0;
     this.updateLoop = this.updateLoop.bind(this);
     this.drawLoop = this.drawLoop.bind(this);
-
   }
 
   start() {
@@ -85,7 +84,8 @@ class Driver {
     const timeDelta = timestamp - this.lastDrawTime;
     this.lastDrawTime = timestamp;
     if (!this.isPaused) {
-      this.draw(timeDelta);
+      this.main.draw(timeDelta);
+      // this.draw(timeDelta);
     }
     if (this.isRunning) {
       requestAnimationFrame(this.drawLoop);
