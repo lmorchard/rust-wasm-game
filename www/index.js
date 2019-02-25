@@ -33,6 +33,7 @@ class Driver {
     this.lastDrawTime = 0;
     this.updateLoop = this.updateLoop.bind(this);
     this.drawLoop = this.drawLoop.bind(this);
+
   }
 
   start() {
@@ -98,20 +99,27 @@ class Driver {
     const orientation = new Float32Array(memory.buffer, this.main.get_render_orientation(), size);
     const asset_ids = new Uint8Array(memory.buffer, this.main.get_render_asset_ids(), size);
 
+    document.getElementById("result").innerText = JSON.stringify({
+      size, pos_x, pos_y, orientation, asset_ids
+    }, null, " ");
+
     ctx.fillStyle = 'rgba(0, 0, 0, 1.0)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    const scale = 0.25;
     for (let idx = 0; idx < size; idx++) {
       ctx.save();
       ctx.translate(pos_x[idx], pos_y[idx]);
       ctx.rotate(orientation[idx]);
-      // ctx.scale(sprite.size / 100, sprite.size / 100);
+      ctx.scale(scale, scale);
+      ctx.lineWidth = 1.0 / scale;
       ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
-
       ctx.beginPath();
-      ctx.arc(0, 0, 5, 0, PI2, true);
+      ctx.arc(0, 0, 50, 0, PI2, true);
+      ctx.moveTo(0, 0);
+      ctx.lineTo(0, -50);
+      ctx.moveTo(0, 0);
       ctx.stroke();
-
       ctx.restore();
     }
   }
