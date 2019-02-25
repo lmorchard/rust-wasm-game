@@ -10,7 +10,7 @@ use motion;
 #[derive(Debug, Copy, Clone)]
 pub struct Bouncer(pub Point2<f32>, pub Point2<f32>);
 
-pub fn update_bouncers(world: &mut World, dt: DeltaTime) {
+pub fn update_bouncers(world: &mut World, _dt: DeltaTime) {
     world
         .matcher::<All<(
             Read<motion::Position>,
