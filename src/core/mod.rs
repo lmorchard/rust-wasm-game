@@ -1,7 +1,7 @@
 use std::time::Duration;
 
-pub mod motion;
 pub mod bouncer;
+pub mod motion;
 pub mod sprite;
 
 #[derive(Debug, Copy, Clone)]

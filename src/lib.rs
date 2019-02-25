@@ -1,19 +1,19 @@
 extern crate cfg_if;
 extern crate itertools;
+extern crate js_sys;
 extern crate nalgebra as na;
 extern crate pyro;
+extern crate rand;
 extern crate wasm_bindgen;
 extern crate web_sys;
-extern crate js_sys;
-extern crate rand;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
 
-use pyro::*;
-use rand::Rng;
-use rand::rngs::OsRng;
 use na::{Point2, Vector2};
+use pyro::*;
+use rand::rngs::OsRng;
+use rand::Rng;
 
 use std::f32::consts::PI;
 const PI2: f32 = PI * 2.0;
@@ -52,11 +52,16 @@ pub type BouncingEntity = (
 pub fn create_bouncing_entity() -> BouncingEntity {
     (
         motion::Position(Point2::new(gen_range(0.0, 400.0), gen_range(0.0, 400.0))),
-        motion::Velocity(Vector2::new(gen_range(100.0, 500.0), gen_range(100.0, 500.0))),
+        motion::Velocity(Vector2::new(
+            gen_range(100.0, 500.0),
+            gen_range(100.0, 500.0),
+        )),
         motion::Orientation(0.0),
         motion::Rotation(gen_range(0.0 - PI2, PI2)),
         bouncer::Bouncer(Point2::new(0.0, 0.0), Point2::new(600.0, 600.0)),
-        sprite::Sprite { asset_id: sprite::AssetId::Missile },
+        sprite::Sprite {
+            asset_id: sprite::AssetId::Missile,
+        },
     )
 }
 
@@ -84,7 +89,9 @@ impl RenderFrame {
         }
     }
 
-    pub fn capacity(&self) -> usize { self.capacity }
+    pub fn capacity(&self) -> usize {
+        self.capacity
+    }
 
     pub fn resize(&mut self, capacity: usize) {
         self.capacity = capacity;
@@ -103,7 +110,11 @@ impl RenderFrame {
 
     pub fn snapshot_world(&mut self, world: &World) {
         let entities: Vec<_> = world
-            .matcher::<All<(Read<motion::Position>, Read<motion::Orientation>, Read<sprite::Sprite>)>>()
+            .matcher::<All<(
+                Read<motion::Position>,
+                Read<motion::Orientation>,
+                Read<sprite::Sprite>,
+            )>>()
             .collect();
 
         let capacity_needed = entities.len();
@@ -126,17 +137,26 @@ impl RenderFrame {
 
 #[wasm_bindgen]
 impl RenderFrame {
-    pub fn size(&self) -> usize { self.size }
-    pub fn asset_ids(&self) -> *const u8 { self.asset_id.as_ptr() }
-    pub fn pos_x(&self) -> *const f32 { self.pos_x.as_ptr() }
-    pub fn pos_y(&self) -> *const f32 { self.pos_y.as_ptr() }
-    pub fn orientation(&self) -> *const f32 { self.orientation.as_ptr() }
+    pub fn size(&self) -> usize {
+        self.size
+    }
+    pub fn asset_ids(&self) -> *const u8 {
+        self.asset_id.as_ptr()
+    }
+    pub fn pos_x(&self) -> *const f32 {
+        self.pos_x.as_ptr()
+    }
+    pub fn pos_y(&self) -> *const f32 {
+        self.pos_y.as_ptr()
+    }
+    pub fn orientation(&self) -> *const f32 {
+        self.orientation.as_ptr()
+    }
 }
 
 pub fn gen_range(low: f32, high: f32) -> f32 {
     OsRng::new().unwrap().gen_range(low, high)
 }
-
 
 #[wasm_bindgen]
 pub struct Main {
@@ -152,9 +172,7 @@ impl Main {
         let mut world = World::new();
         let render_frame = RenderFrame::new(10);
 
-        let bouncers = (0..50).map(|_| {
-            create_bouncing_entity()
-        });
+        let bouncers = (0..50).map(|_| create_bouncing_entity());
         world.append_components(bouncers);
 
         Main {
@@ -167,10 +185,7 @@ impl Main {
         let dt = DeltaTime(time_delta / 1000.0);
         let world = &mut self.world;
 
-        let update_funcs = [
-            motion::update_motion,
-            bouncer::update_bouncers,
-        ];
+        let update_funcs = [motion::update_motion, bouncer::update_bouncers];
         for update_func in update_funcs.iter() {
             update_func(world, dt);
         }
@@ -178,14 +193,24 @@ impl Main {
         self.render_frame.snapshot_world(world);
     }
 
-    pub fn get_render_size(&self) -> usize { self.render_frame.size() }
-    pub fn get_render_asset_ids(&self) -> *const u8 { self.render_frame.asset_ids() }
-    pub fn get_render_pos_x(&self) -> *const f32 { self.render_frame.pos_x() }
-    pub fn get_render_pos_y(&self) -> *const f32 { self.render_frame.pos_y() }
-    pub fn get_render_orientation(&self) -> *const f32 { self.render_frame.orientation() }
+    pub fn get_render_size(&self) -> usize {
+        self.render_frame.size()
+    }
+    pub fn get_render_asset_ids(&self) -> *const u8 {
+        self.render_frame.asset_ids()
+    }
+    pub fn get_render_pos_x(&self) -> *const f32 {
+        self.render_frame.pos_x()
+    }
+    pub fn get_render_pos_y(&self) -> *const f32 {
+        self.render_frame.pos_y()
+    }
+    pub fn get_render_orientation(&self) -> *const f32 {
+        self.render_frame.orientation()
+    }
 
-    pub fn start(&self) { }
-    pub fn stop(&self) { }
-    pub fn pause(&self) { }
-    pub fn resume(&self) { }
+    pub fn start(&self) {}
+    pub fn stop(&self) {}
+    pub fn pause(&self) {}
+    pub fn resume(&self) {}
 }

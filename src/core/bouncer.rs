@@ -1,8 +1,8 @@
-extern crate pyro;
 extern crate nalgebra as na;
+extern crate pyro;
 
-use pyro::*;
 use na::Point2;
+use pyro::*;
 use DeltaTime;
 
 use motion;
@@ -12,7 +12,11 @@ pub struct Bouncer(pub Point2<f32>, pub Point2<f32>);
 
 pub fn update_bouncers(world: &mut World, dt: DeltaTime) {
     world
-        .matcher::<All<(Read<motion::Position>, Write<motion::Velocity>, Read<Bouncer>)>>()
+        .matcher::<All<(
+            Read<motion::Position>,
+            Write<motion::Velocity>,
+            Read<Bouncer>,
+        )>>()
         .for_each(|(pos, vel, bouncer)| {
             if pos.0.x <= bouncer.0.x || pos.0.x >= bouncer.1.x {
                 vel.0.x = 0.0 - vel.0.x;
@@ -22,4 +26,3 @@ pub fn update_bouncers(world: &mut World, dt: DeltaTime) {
             }
         });
 }
-

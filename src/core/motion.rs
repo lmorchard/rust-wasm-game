@@ -1,8 +1,8 @@
-extern crate pyro;
 extern crate nalgebra as na;
+extern crate pyro;
 
-use pyro::*;
 use na::{Point2, Vector2};
+use pyro::*;
 use std::f32::consts::PI;
 use DeltaTime;
 
@@ -30,7 +30,11 @@ pub fn update_motion(world: &mut World, dt: DeltaTime) {
         .matcher::<All<(Write<Orientation>, Read<Rotation>)>>()
         .for_each(|(ori, rot)| {
             ori.0 += rot.0 * dt.0;
-            if ori.0 < 0.0 { ori.0 += PI2; }
-            if ori.0 > PI2 { ori.0 -= PI2; }
+            if ori.0 < 0.0 {
+                ori.0 += PI2;
+            }
+            if ori.0 > PI2 {
+                ori.0 -= PI2;
+            }
         });
 }
