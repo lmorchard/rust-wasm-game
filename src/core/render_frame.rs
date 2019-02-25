@@ -1,4 +1,3 @@
-extern crate pyro;
 use pyro::*;
 
 use motion;

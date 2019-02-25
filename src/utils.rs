@@ -1,3 +1,6 @@
+use rand::rngs::OsRng;
+use rand::Rng;
+
 use cfg_if::cfg_if;
 
 cfg_if! {
@@ -14,4 +17,8 @@ cfg_if! {
         #[inline]
         pub fn set_panic_hook() {}
     }
+}
+
+pub fn gen_range(low: f32, high: f32) -> f32 {
+    OsRng::new().unwrap().gen_range(low, high)
 }

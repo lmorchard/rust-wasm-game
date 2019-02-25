@@ -12,8 +12,6 @@ use wasm_bindgen::prelude::*;
 
 use na::{Point2, Vector2};
 use pyro::*;
-use rand::rngs::OsRng;
-use rand::Rng;
 
 mod utils;
 
@@ -52,22 +50,21 @@ pub type BouncingEntity = (
 
 pub fn create_bouncing_entity() -> BouncingEntity {
     (
-        motion::Position(Point2::new(gen_range(0.0, 400.0), gen_range(0.0, 400.0))),
+        motion::Position(Point2::new(
+            utils::gen_range(0.0, 400.0),
+            utils::gen_range(0.0, 400.0),
+        )),
         motion::Velocity(Vector2::new(
-            gen_range(100.0, 500.0),
-            gen_range(100.0, 500.0),
+            utils::gen_range(100.0, 500.0),
+            utils::gen_range(100.0, 500.0),
         )),
         motion::Orientation(0.0),
-        motion::Rotation(gen_range(0.0 - PI2, PI2)),
+        motion::Rotation(utils::gen_range(0.0 - PI2, PI2)),
         bouncer::Bouncer(Point2::new(0.0, 0.0), Point2::new(600.0, 600.0)),
         sprite::Sprite {
             asset_id: sprite::AssetId::Missile,
         },
     )
-}
-
-pub fn gen_range(low: f32, high: f32) -> f32 {
-    OsRng::new().unwrap().gen_range(low, high)
 }
 
 #[wasm_bindgen]
@@ -84,7 +81,7 @@ impl Main {
         let mut world = World::new();
         let frame = render_frame::RenderFrame::new(10);
 
-        let bouncers = (0..50).map(|_| create_bouncing_entity());
+        let bouncers = (0..10).map(|_| create_bouncing_entity());
         world.append_components(bouncers);
 
         Main { world, frame }

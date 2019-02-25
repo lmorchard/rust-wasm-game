@@ -1,6 +1,3 @@
-extern crate nalgebra as na;
-extern crate pyro;
-
 use na::{Point2, Vector2};
 use pyro::*;
 use std::f32::consts::PI;

@@ -1,6 +1,3 @@
-extern crate nalgebra as na;
-extern crate pyro;
-
 use na::Point2;
 use pyro::*;
 use DeltaTime;
