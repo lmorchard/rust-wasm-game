@@ -99,9 +99,11 @@ class Driver {
     const orientation = new Float32Array(memory.buffer, this.main.get_render_orientation(), size);
     const asset_ids = new Uint8Array(memory.buffer, this.main.get_render_asset_ids(), size);
 
+    /*
     document.getElementById("result").innerText = JSON.stringify({
       size, pos_x, pos_y, orientation, asset_ids
     }, null, " ");
+    */
 
     ctx.fillStyle = 'rgba(0, 0, 0, 1.0)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);

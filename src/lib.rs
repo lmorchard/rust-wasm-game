@@ -11,7 +11,6 @@ use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
 
 use pyro::*;
-// use itertools::Itertools;
 use rand::Rng;
 use rand::rngs::OsRng;
 use na::{Point2, Vector2};
@@ -41,58 +40,13 @@ macro_rules! log {
     }
 }
 
-// ----------------------------------------------------------------------
-
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
-pub enum AssetId {
-    Grunt = 0,
-    Missile = 1,
-    SmallMissile = 2,
-    Tower = 3,
-    Explosion = 4,
-}
-pub fn assetid_as_u8(asset_id: AssetId) -> u8 {
-    match asset_id {
-        AssetId::Grunt => 0,
-        AssetId::Missile => 1,
-        AssetId::SmallMissile => 2,
-        AssetId::Tower => 3,
-        AssetId::Explosion => 4,
-    }
-}
-
-#[derive(Debug, Copy, Clone)]
-pub struct Sprite {
-    pub asset_id: AssetId,
-}
-
-// ----------------------------------------------------------------------
-
-#[derive(Debug, Copy, Clone)]
-pub struct Bouncer(pub Point2<f32>, pub Point2<f32>);
-
-pub fn update_bouncers(world: &mut World, dt: DeltaTime) {
-    world
-        .matcher::<All<(Read<motion::Position>, Write<motion::Velocity>, Read<Bouncer>)>>()
-        .for_each(|(pos, vel, bouncer)| {
-            if pos.0.x <= bouncer.0.x || pos.0.x >= bouncer.1.x {
-                vel.0.x = 0.0 - vel.0.x;
-            }
-            if pos.0.y <= bouncer.0.y || pos.0.y >= bouncer.1.y {
-                vel.0.y = 0.0 - vel.0.y;
-            }
-        });
-}
-
-// ----------------------------------------------------------------------
-
 pub type BouncingEntity = (
     motion::Position,
     motion::Velocity,
     motion::Orientation,
     motion::Rotation,
-    Bouncer,
-    Sprite,
+    bouncer::Bouncer,
+    sprite::Sprite,
 );
 
 pub fn create_bouncing_entity() -> BouncingEntity {
@@ -101,8 +55,8 @@ pub fn create_bouncing_entity() -> BouncingEntity {
         motion::Velocity(Vector2::new(gen_range(100.0, 500.0), gen_range(100.0, 500.0))),
         motion::Orientation(0.0),
         motion::Rotation(gen_range(0.0 - PI2, PI2)),
-        Bouncer(Point2::new(0.0, 0.0), Point2::new(600.0, 600.0)),
-        Sprite { asset_id: AssetId::Missile },
+        bouncer::Bouncer(Point2::new(0.0, 0.0), Point2::new(600.0, 600.0)),
+        sprite::Sprite { asset_id: sprite::AssetId::Missile },
     )
 }
 
@@ -149,7 +103,7 @@ impl RenderFrame {
 
     pub fn snapshot_world(&mut self, world: &World) {
         let entities: Vec<_> = world
-            .matcher::<All<(Read<motion::Position>, Read<motion::Orientation>, Read<Sprite>)>>()
+            .matcher::<All<(Read<motion::Position>, Read<motion::Orientation>, Read<sprite::Sprite>)>>()
             .collect();
 
         let capacity_needed = entities.len();
@@ -160,7 +114,7 @@ impl RenderFrame {
 
         let mut idx = 0;
         for (pos, orientation, sprite) in entities {
-            self.asset_id.push(assetid_as_u8(sprite.asset_id));
+            self.asset_id.push(sprite::assetid_as_u8(sprite.asset_id));
             self.pos_x.push(pos.0.x);
             self.pos_y.push(pos.0.y);
             self.orientation.push(orientation.0);
@@ -198,7 +152,7 @@ impl Main {
         let mut world = World::new();
         let render_frame = RenderFrame::new(10);
 
-        let bouncers = (0..10).map(|_| {
+        let bouncers = (0..50).map(|_| {
             create_bouncing_entity()
         });
         world.append_components(bouncers);
@@ -215,7 +169,7 @@ impl Main {
 
         let update_funcs = [
             motion::update_motion,
-            update_bouncers,
+            bouncer::update_bouncers,
         ];
         for update_func in update_funcs.iter() {
             update_func(world, dt);

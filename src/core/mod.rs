@@ -1,6 +1,8 @@
 use std::time::Duration;
 
 pub mod motion;
+pub mod bouncer;
+pub mod sprite;
 
 #[derive(Debug, Copy, Clone)]
 pub struct DeltaTime(pub f32);
